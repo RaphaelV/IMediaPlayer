@@ -14,7 +14,7 @@ struct MetaData
     std::string title = "";
     std::string artist = "";
     std::string album = "";
-    std::chrono::milliseconds duration_ms = std::chrono::milliseconds(0);
+    std::chrono::milliseconds duration_ms = std::chrono::milliseconds{0};
     std::string codec = "";
 
     inline bool isValid() const;
@@ -40,6 +40,8 @@ public:
     bool isValid() const;
 
     std::string displayInfo() const;
+
+    std::chrono::milliseconds duration() const;
 
 private:
     friend std::ostream& operator << (std::ostream& out, const Track& track);

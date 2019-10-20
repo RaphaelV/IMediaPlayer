@@ -1,20 +1,8 @@
 #include <iostream>
+
+#include "utils.h"
+
 #include "track.h"
-
-std::string displayDuration(std::chrono::milliseconds ms)
-{
-    using namespace std::chrono;
-    auto secs = duration_cast<seconds>(ms);
-    ms -= duration_cast<milliseconds>(secs);
-    auto mins = duration_cast<minutes>(secs);
-    secs -= duration_cast<seconds>(mins);
-    auto hour = duration_cast<hours>(mins);
-    mins -= duration_cast<minutes>(hour);
-
-    std::stringstream ss;
-    ss << hour.count() << "h " << mins.count() << "m " << secs.count() << "s";
-    return ss.str();
-}
 
 std::ostream& operator << (std::ostream& out, const MetaData& meta_data)
 {
@@ -62,8 +50,13 @@ std::string Track::displayInfo() const
 {
     std::stringstream ss;
     ss << "Track: " << m_metadata.artist << " - " << m_metadata.title << " ("<< m_metadata.album << ")\n"
-       << "Duration: " << displayDuration(m_metadata.duration_ms) << "\n"
+       << "Duration: " << utils::displayDuration(m_metadata.duration_ms) << "\n"
        << "Codec: " << m_metadata.codec;
 
     return ss.str();
+}
+
+std::chrono::milliseconds Track::duration() const
+{
+    return m_metadata.duration_ms;
 }

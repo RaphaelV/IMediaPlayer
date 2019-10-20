@@ -3,6 +3,7 @@
 #include <sstream>
 #include <vector>
 
+#include "fileloader.h"
 #include "imediaplayer.h"
 
 
@@ -76,16 +77,21 @@ fs::path IMediaPlayer::convertToAbsolutePath(const std::string& file)
     return path;
 }
 
-
 void IMediaPlayer::play(const fs::path& file)
 {
-    if (fs::exists(file))
+    std::error_code ec;
+
+    if (fs::exists(file, ec))
     {
         std::string ext = file.extension().string();
 
         if (isTrackExtValid(ext.c_str()))
         {
-            std::cout << "Track to play " << file << std::endl;
+            if (auto track_to_play = FileLoader::loadTrack(file.string()))
+            {
+                std::cout << std::endl << track_to_play.value().displayInfo() << std::endl;
+
+            }
         }
         else if (ext == k_valid_playlist_ext)
         {
@@ -99,6 +105,9 @@ void IMediaPlayer::play(const fs::path& file)
     else
     {
         std::cout << "File not found: " << file << std::endl;
+
+        if (ec)
+            std::cout << " (" << ec.message() << ")" << std::endl;
     }
 }
 

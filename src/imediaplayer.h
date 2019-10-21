@@ -1,11 +1,12 @@
 #ifndef IMEDIAPLAYER_H
 #define IMEDIAPLAYER_H
 
-#include <array>
-#include <chrono>
 #include <filesystem>
-#include <mutex>
+#include <optional>
 #include <string>
+
+#include "musicplayer.h"
+#include "playlist.h"
 
 namespace fs = std::filesystem;
 
@@ -14,47 +15,33 @@ class Track;
 class IMediaPlayer
 {
 public:
-    enum class State {
-        Stopped = 0,
-        Playing,
-        Paused,
-        Ready
-    };
-    std::string displayState(State s) const;
-
     IMediaPlayer();
 
+    void parseCommand(const std::string& user_input);
     void exec();
+    void exit();
 
-    static fs::path convertToAbsolutePath(const std::string& file);
-    void play(const fs::path& file);
+    void readPlaylist();
+
+    void addTrack(const std::string& file);
+    void removeTrack(const std::string& file);
+    void removeTrack(const fs::path& file);
+
+    void play();
+    void next();
+    void previous();
     void pause();
-    void resume();
     void stop();
     void trackPosition() const;
 
-    void playTrack(const Track& track);
-
-    static constexpr std::array<const char*, 3> k_valid_track_ext = {".mp3d",".omg",".flaque"};
-    static constexpr const char* k_valid_playlist_ext = ".plst";
+private:
+    std::optional<Track> loadTrack(const fs::path& file_absolut_path);
+    void wait();
 
 private:
-    static bool isTrackExtValid(const char* ext);
-
-    std::chrono::milliseconds position() const;
-    void setPosition(std::chrono::milliseconds trackPosition);
-
-    State state() const;
-    void setState(State state);
-
-    void trackPlaybackSimu(std::chrono::milliseconds duration);
-
-private:
-    mutable std::mutex m_postion_lock;
-    std::chrono::milliseconds m_position_ms = std::chrono::milliseconds{0};
-
-    mutable std::mutex m_state_lock;
-    State m_state = State::Ready;
+    bool m_run = true;
+    MusicPlayer m_music_player;
+    Playlist m_playlist;
 };
 
 #endif // IMEDIAPLAYER_H

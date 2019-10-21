@@ -5,9 +5,16 @@
 
 #include "track.h"
 
-struct FileLoader
+namespace file_loader
 {
-    static std::optional<Track> loadTrack(const fs::path& file_path);
+
+fs::path convertToAbsolutePath(const std::string& file);
+
+bool doesFileExist(const fs::path& path);
+
+std::optional<Track> parseTrack(const fs::path& file_path);
+
 };
+
 
 #endif // FILELOADER_H

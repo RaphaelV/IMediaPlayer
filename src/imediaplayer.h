@@ -20,12 +20,8 @@ public:
     void exec();
     void exit();
 
-    void parseCommand(const std::string& user_input);
-    void readPlaylist();
-
     void addTrack(const std::string& file);
     void removeTrack(const std::string& file);
-    void removeTrack(const fs::path& file);
 
     void play();
     void next();
@@ -35,8 +31,11 @@ public:
     void trackPosition() const;
 
 private:
+    void parseCommand(const std::string& user_input);
+    void readPlaylist();
+
     std::optional<Track> loadTrack(const fs::path& file_absolut_path);
-    void wait();
+    void removeTrack(const fs::path& file);
 
 private:
     bool m_run = true;

@@ -55,7 +55,7 @@ void MusicPlayer::playTrack(const Track& track)
 {
     if (playbackState() == PlaybackState::Stopped)
     {
-        std::cout << "\n\n" << track.displayInfo() << std::endl;
+        std::cout << "\n" << track.displayInfo() << "\n" << std::endl;
         auto d = track.duration();
         setPosition(std::chrono::milliseconds{0});
         std::thread t{[this, d]() { trackPlaybackSimu(d); }};

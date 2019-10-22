@@ -2,16 +2,6 @@
 
 #include "playlist.h"
 
-Playlist::Playlist()
-{
-
-}
-
-void Playlist::play()
-{
-
-}
-
 void Playlist::add(const fs::path& p)
 {
     m_tracks.push_back(p);
@@ -19,33 +9,77 @@ void Playlist::add(const fs::path& p)
 
 void Playlist::clear()
 {
+    m_tracks.clear();
+    m_current_track = m_tracks.end();
     std::cout << "Playlist cleared" << std::endl;
 }
 
-fs::path Playlist::currentTrack()
+void Playlist::play()
 {
-    if (m_tracks.size())
-        return m_tracks.front();
+    if (empty())
+    {
+        std::cout << "The playlist is empty" << std::endl;
+        return;
+    }
 
-    return {};
+    if (isFinished())
+        m_current_track = m_tracks.begin();
+}
+
+void Playlist::stop()
+{
+    m_current_track = m_tracks.end();
+}
+
+bool Playlist::isFinished() const
+{
+    return m_current_track == m_tracks.end();
+}
+
+fs::path Playlist::currentTrack() const
+{
+    if (isFinished())
+        return {};
+
+    return *m_current_track;
 }
 
 bool Playlist::hasNext() const
 {
+    if (isFinished() || std::next(m_current_track) == m_tracks.end())
+        return false;
+
     return true;
+}
+
+fs::path Playlist::next()
+{
+    if (isFinished())
+        return {};
+
+    m_current_track = std::next(m_current_track, 1);
+
+    if (isFinished())
+        return {};
+
+    return  *m_current_track;
 }
 
 bool Playlist::hasPrevious() const
 {
-    return false;
+   return m_current_track != m_tracks.begin();
 }
 
-void Playlist::next()
+fs::path Playlist::previous()
 {
+    if (!hasPrevious())
+        return {};
 
+    m_current_track = std::prev(m_current_track, 1);
+    return  *m_current_track;
 }
 
-void Playlist::previous()
+bool Playlist::empty() const
 {
-
+    return m_tracks.empty();
 }

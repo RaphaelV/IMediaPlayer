@@ -9,25 +9,27 @@ namespace fs = std::filesystem;
 class Playlist
 {
 public:
-    Playlist();
-
-    void play();
     void add(const fs::path& p);
     void clear();
 
-    fs::path currentTrack();
+    void play();
+    void stop();
+
+    bool isFinished() const;
+    // Returns an empty path if there is no current track
+    fs::path currentTrack() const;
 
     bool hasNext() const;
+    fs::path next();
+
     bool hasPrevious() const;
+    fs::path previous();
 
-    void next();
-    void previous();
-
-    bool empty() const {}
+    bool empty() const;
 
 private:
     std::list<fs::path> m_tracks;
-    mutable size_t index = 0;
+    std::list<fs::path>::iterator m_current_track = m_tracks.begin();
 };
 
 #endif // PLAYLIST_H

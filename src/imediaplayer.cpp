@@ -14,14 +14,19 @@
 
 IMediaPlayer::IMediaPlayer()
 {
-    std::cout << "IMediaPlayer reads the following music file formats:";
+    std::cout << "Welcome to IMediaPlay, an imaginary music player\n";
+    std::cout << "\nIMediaPlayer can play the following music file formats:";
 
     for (const char* ext : MusicPlayer::k_valid_track_ext)
     {
         std::cout << " " << ext ;
     }
 
-    std::cout << std::endl;
+    std::cout << "\nYou can use the following commands:";
+    std::cout << "\n\tadd_track <track_name/track_path>";
+    std::cout << "\n\tplay optionnal(<track_name/track_path>)";
+    std::cout << "\n\tpause, stop, next, previous (prev), positions (pos), exit";
+    std::cout << "\n\n" << std::endl;
 }
 
 static std::string readUserInput()
@@ -37,16 +42,22 @@ void IMediaPlayer::exec()
 
     std::future<std::string> user_input = std::async(std::launch::async, readUserInput);
 
+    addTrack("track.bad");
+    addTrack("BAD");
+    addTrack("track.omg");
+    addTrack("track.bad.omg");
+    addTrack("track.flaque");
+    addTrack("track.mp3d");
+
     while (m_run)
     {
-        if (user_input.wait_for(std::chrono::milliseconds(1)) == std::future_status::ready)
+        if (user_input.wait_for(std::chrono::seconds(1)) == std::future_status::ready)
         {
             parseCommand(user_input.get());
             user_input = std::async(std::launch::async, readUserInput);
         }
 
         readPlaylist();
-        wait();
     }
 
     std::cout << "IMediaPlayer stopping." << std::endl;
@@ -78,6 +89,7 @@ void IMediaPlayer::parseCommand(const std::string& user_input)
     {
         if (args.size() > 1)
         {
+            stop();
             m_playlist.clear();
             addTrack(args.at(1));
             play();
@@ -106,9 +118,19 @@ void IMediaPlayer::parseCommand(const std::string& user_input)
     {
         stop();
     }
-    else if (command == "pos")
+    else if (command == "pos"
+             || command == "position")
     {
         trackPosition();
+    }
+    else if (command == "next")
+    {
+        next();
+    }
+    else if (command == "prev"
+             || command == "previous")
+    {
+        previous();
     }
     else if (command == "exit")
     {
@@ -122,27 +144,20 @@ void IMediaPlayer::parseCommand(const std::string& user_input)
 
 void IMediaPlayer::readPlaylist()
 {
-    if (m_music_player.playbackState() == MusicPlayer::PlaybackState::Stopped)
+    if (m_music_player.playbackState() == MusicPlayer::PlaybackState::Stopped
+            && !m_playlist.isFinished())
     {
-        if (m_playlist.hasNext())
+        if (auto optional_track = loadTrack(m_playlist.currentTrack()))
         {
-            if (auto optional_track = loadTrack(m_playlist.currentTrack()))
-            {
-                const auto& track = optional_track.value();
-                m_music_player.playTrack(track);
-            }
-            else
-            {
-                if (!m_playlist.currentTrack().empty())
-                    removeTrack(m_playlist.currentTrack());
-
-                next();
-            }
+            m_music_player.playTrack(optional_track.value());
         }
         else
         {
-            stop();
+            if (!m_playlist.currentTrack().empty())
+                removeTrack(m_playlist.currentTrack());
         }
+
+        m_playlist.next();
     }
 }
 
@@ -155,11 +170,6 @@ std::optional<Track> IMediaPlayer::loadTrack(const fs::path& file_absolut_path)
     return file_loader::parseTrack(file_absolut_path);
 }
 
-void IMediaPlayer::wait()
-{
-    std::this_thread::sleep_for(std::chrono::milliseconds{200});
-}
-
 void IMediaPlayer::addTrack(const std::string& file)
 {
     fs::path p = file_loader::convertToAbsolutePath(file);
@@ -169,6 +179,7 @@ void IMediaPlayer::addTrack(const std::string& file)
     {
         if(MusicPlayer::isTrackExtValid(ext.c_str()))
         {
+            std::cout << "\tAdded " << p.filename() << std::endl;
             m_playlist.add(p);
         }
         else
@@ -190,17 +201,26 @@ void IMediaPlayer::removeTrack(const fs::path &file)
 
 void IMediaPlayer::play()
 {
-    m_music_player.request(MusicPlayer::Command::Play);
+    if (m_music_player.playbackState() == MusicPlayer::PlaybackState::Paused)
+    {
+        m_music_player.request(MusicPlayer::Command::Play);
+    }
+    else
+    {
+        m_playlist.play();
+    }
 }
 
 void IMediaPlayer::next()
 {
-
+    m_music_player.request(MusicPlayer::Command::Stop);
+    m_playlist.next();
 }
 
 void IMediaPlayer::previous()
 {
-
+    m_music_player.request(MusicPlayer::Command::Stop);
+    m_playlist.previous();
 }
 
 void IMediaPlayer::pause()
@@ -210,6 +230,7 @@ void IMediaPlayer::pause()
 
 void IMediaPlayer::stop()
 {
+    m_playlist.stop();
     m_music_player.request(MusicPlayer::Command::Stop);
 }
 

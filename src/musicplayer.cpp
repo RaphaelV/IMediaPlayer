@@ -1,3 +1,4 @@
+#include <cassert>
 #include <iostream>
 #include <thread>
 
@@ -5,15 +6,30 @@
 
 #include "musicplayer.h"
 
-std::string MusicPlayer::displayCommand(Command command) const
+
+constexpr const char* MusicPlayer::displayCommand(MusicPlayer::Command command)
 {
     if (command == Command::Play)
-        return "Playing";
+        return "Play";
 
     if (command == Command::Pause)
-        return "Paused";
+        return "Pause";
 
     if (command == Command::Stop)
+        return "Stop";
+
+    return "";
+}
+
+constexpr const char* MusicPlayer::displayPlaybackState(MusicPlayer::PlaybackState state) const
+{
+    if (state == PlaybackState::Playing)
+        return "Playing";
+
+    if (state == PlaybackState::Paused)
+        return "Paused";
+
+    if (state == PlaybackState::Stopped)
         return "Stopped";
 
     return "";
@@ -35,27 +51,31 @@ std::chrono::milliseconds MusicPlayer::position() const
     return m_position_ms;
 }
 
-void MusicPlayer::playTrack(const Track &track)
+void MusicPlayer::playTrack(const Track& track)
 {
-    std::cout << "\n\n" << track.displayInfo() << std::endl;
-    auto d = track.duration();
-    std::thread t{[this, d]() { trackPlaybackSimu(d); }};
-    t.detach();
+    if (playbackState() == PlaybackState::Stopped)
+    {
+        std::cout << "\n\n" << track.displayInfo() << std::endl;
+        auto d = track.duration();
+        setPosition(std::chrono::milliseconds{0});
+        std::thread t{[this, d]() { trackPlaybackSimu(d); }};
+        t.detach();
+    }
+    else
+    {
+        std::cout << "Previous track not stopped" << std::endl;
+    }
+}
+
+void MusicPlayer::request(MusicPlayer::Command command)
+{
+    std::lock_guard<std::mutex> lock(m_commands_mutex);
+    m_commands.push(command);
 }
 
 void MusicPlayer::setPosition(std::chrono::milliseconds pos)
 {
     m_position_ms = pos;
-}
-
-MusicPlayer::Command MusicPlayer::command() const
-{
-    return  m_command;
-}
-
-void MusicPlayer::setCommand(MusicPlayer::Command command)
-{
-    m_command = command;
 }
 
 MusicPlayer::PlaybackState MusicPlayer::playbackState() const
@@ -65,29 +85,27 @@ MusicPlayer::PlaybackState MusicPlayer::playbackState() const
 
 void MusicPlayer::setPlaybackState(PlaybackState state)
 {
+    if (m_playback_state == state)
+        return;
+
     m_playback_state = state;
+    std::cout << "\tTrack: " << displayPlaybackState(state) << std::endl;
 }
 
 void MusicPlayer::trackPlaybackSimu(std::chrono::milliseconds duration)
 {
-    setPlaybackState(PlaybackState::Busy);
-    setPosition(std::chrono::milliseconds{0});
+    Command command = Command::Play;
 
-    auto update_command = [this](Command& local_command)
+    while (command != Command::Stop)
     {
-        if (local_command != command())
+        if (hasCommand())
         {
-            local_command = command();
+            command = readCommand();
         }
-    };
 
-    Command command = Command::Stop;
-    update_command(command);
-
-    for (;command != Command::Stop; update_command(command))
-    {
         if (command == Command::Play)
         {
+            setPlaybackState(PlaybackState::Playing);
             auto one_sec = std::chrono::seconds{1};
             // Sound playing simulation
             std::this_thread::sleep_for(one_sec);
@@ -100,9 +118,27 @@ void MusicPlayer::trackPlaybackSimu(std::chrono::milliseconds duration)
         }
         else if (command == Command::Pause)
         {
+            setPlaybackState(PlaybackState::Paused);
             std::this_thread::sleep_for(std::chrono::milliseconds{200});
         }
     }
 
-    setPlaybackState(PlaybackState::Ready);
+    setPlaybackState(PlaybackState::Stopped);
+}
+
+bool MusicPlayer::hasCommand() const
+{
+    std::unique_lock<std::mutex> lock(m_commands_mutex);
+    return !m_commands.empty();
+}
+
+MusicPlayer::Command MusicPlayer::readCommand()
+{
+    std::unique_lock<std::mutex> lock(m_commands_mutex);
+    assert(!m_commands.empty());
+
+    Command command = m_commands.front();
+    m_commands.pop();
+
+    return command;
 }

@@ -24,6 +24,39 @@ IMediaPlayer::IMediaPlayer()
     std::cout << std::endl;
 }
 
+static std::string readUserInput()
+{
+    std::string user_input;
+    std::getline(std::cin, user_input);
+    return user_input;
+}
+
+void IMediaPlayer::exec()
+{
+    std::cout << "IMediaPlayer starting." << std::endl;
+
+    std::future<std::string> user_input = std::async(std::launch::async, readUserInput);
+
+    while (m_run)
+    {
+        if (user_input.wait_for(std::chrono::milliseconds(1)) == std::future_status::ready)
+        {
+            parseCommand(user_input.get());
+            user_input = std::async(std::launch::async, readUserInput);
+        }
+
+        readPlaylist();
+        wait();
+    }
+
+    std::cout << "IMediaPlayer stopping." << std::endl;
+}
+
+void IMediaPlayer::exit()
+{
+    m_run = false;
+}
+
 void IMediaPlayer::parseCommand(const std::string& user_input)
 {
     std::istringstream iss(user_input);
@@ -89,64 +122,28 @@ void IMediaPlayer::parseCommand(const std::string& user_input)
 
 void IMediaPlayer::readPlaylist()
 {
-    if (m_music_player.playbackState() == MusicPlayer::PlaybackState::Ready)
+    if (m_music_player.playbackState() == MusicPlayer::PlaybackState::Stopped)
     {
-        if (m_music_player.command() == MusicPlayer::Command::Play)
+        if (m_playlist.hasNext())
         {
-            if (m_playlist.hasNext())
+            if (auto optional_track = loadTrack(m_playlist.currentTrack()))
             {
-                if (auto optional_track = loadTrack(m_playlist.currentTrack()))
-                {
-                    const auto& track = optional_track.value();
-                    m_music_player.playTrack(track);
-                }
-                else
-                {
-                    if (!m_playlist.currentTrack().empty())
-                        removeTrack(m_playlist.currentTrack());
-
-                    next();
-                }
+                const auto& track = optional_track.value();
+                m_music_player.playTrack(track);
             }
             else
             {
-                stop();
+                if (!m_playlist.currentTrack().empty())
+                    removeTrack(m_playlist.currentTrack());
+
+                next();
             }
         }
-    }
-}
-
-static std::string readUserInput()
-{
-    std::string user_input;
-    std::getline(std::cin, user_input);
-    return user_input;
-}
-
-void IMediaPlayer::exec()
-{
-    std::cout << "IMediaPlayer starting." << std::endl;
-
-    std::future<std::string> user_input = std::async(std::launch::async, readUserInput);
-
-    while (m_run)
-    {
-        if (user_input.wait_for(std::chrono::milliseconds(1)) == std::future_status::ready)
+        else
         {
-            parseCommand(user_input.get());
-            user_input = std::async(std::launch::async, readUserInput);
+            stop();
         }
-
-        readPlaylist();
-        wait();
     }
-
-    std::cout << "IMediaPlayer stopping." << std::endl;
-}
-
-void IMediaPlayer::exit()
-{
-    m_run = false;
 }
 
 std::optional<Track> IMediaPlayer::loadTrack(const fs::path& file_absolut_path)
@@ -193,7 +190,7 @@ void IMediaPlayer::removeTrack(const fs::path &file)
 
 void IMediaPlayer::play()
 {
-    m_music_player.setCommand(MusicPlayer::Command::Play);
+    m_music_player.request(MusicPlayer::Command::Play);
 }
 
 void IMediaPlayer::next()
@@ -208,12 +205,12 @@ void IMediaPlayer::previous()
 
 void IMediaPlayer::pause()
 {
-    m_music_player.setCommand(MusicPlayer::Command::Pause);
+    m_music_player.request(MusicPlayer::Command::Pause);
 }
 
 void IMediaPlayer::stop()
 {
-    m_music_player.setCommand(MusicPlayer::Command::Stop);
+    m_music_player.request(MusicPlayer::Command::Stop);
 }
 
 void IMediaPlayer::trackPosition() const

@@ -17,10 +17,10 @@ class IMediaPlayer
 public:
     IMediaPlayer();
 
-    void parseCommand(const std::string& user_input);
     void exec();
     void exit();
 
+    void parseCommand(const std::string& user_input);
     void readPlaylist();
 
     void addTrack(const std::string& file);

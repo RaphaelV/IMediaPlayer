@@ -40,7 +40,7 @@ bool MusicPlayer::isTrackExtValid(const char* ext)
     auto it = std::find_if(k_valid_track_ext.begin(), k_valid_track_ext.end(),
                            [ext](const char* valid_ext)
     {
-        return std::strcmp(ext, valid_ext);
+        return std::strcmp(ext, valid_ext) == 0;
     });
 
     return it != k_valid_track_ext.end();

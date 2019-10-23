@@ -2,6 +2,8 @@
 #include <set>
 #include <sstream>
 
+#include "utils.h"
+
 #include "playlist.h"
 
 
@@ -20,6 +22,8 @@ void Playlist::removeDuplicates()
 {
     if (isFinished())
     {
+        size_t nb_tracks = m_tracks.size();
+
         std::set<fs::path> track_already_founded;
         m_tracks.remove_if([&track_already_founded](const fs::path& p)
         {
@@ -27,6 +31,8 @@ void Playlist::removeDuplicates()
             track_already_founded.insert(p);
             return found;
         });
+
+        std::cout << "Removed " << (nb_tracks - m_tracks.size()) << " track(s)" << std::endl;
     }
     else
     {
@@ -81,6 +87,12 @@ bool Playlist::hasNext() const
 
 void Playlist::next()
 {
+    if (m_random)
+    {
+        m_current_track = utils::getRandomElement(m_tracks.begin(), m_tracks.end());
+        return;
+    }
+
     if (hasNext())
     {
         m_current_track = std::next(m_current_track, 1);
@@ -98,6 +110,11 @@ bool Playlist::hasPrevious() const
 
 void Playlist::previous()
 {
+    if (m_random)
+    {
+        std::cout << "No previous track in random mode" << std::endl;
+    }
+
     if (hasPrevious())
     {
         m_current_track = std::prev(m_current_track);
@@ -116,15 +133,16 @@ bool Playlist::empty() const
     return m_tracks.empty();
 }
 
-void Playlist::repeat(bool on)
-{
-    m_repeat = on;
-}
-
 void Playlist::toggleRepeat()
 {
     m_repeat = !m_repeat;
     std::cout << "\t" << displayRepeat() << std::endl;
+}
+
+void Playlist::toggleRandom()
+{
+    m_random = !m_random;
+    std::cout << "\t" << displayRandom() << std::endl;
 }
 
 std::string Playlist::displayRepeat() const
@@ -134,12 +152,19 @@ std::string Playlist::displayRepeat() const
     return ss.str();
 }
 
+std::string Playlist::displayRandom() const
+{
+    std::stringstream ss;
+    ss << "random: " << (m_random ? "ON" : "OFF");
+    return ss.str();
+}
+
 std::string Playlist::displayInfo() const
 {
     std::stringstream ss;
 
     ss << "Playlist size:" << m_tracks.size() << "\n";
-    ss << displayRepeat() << "\n";
+    ss << displayRepeat() << " "<< displayRandom() << "\n";
 
     for (const fs::path& track : m_tracks)
     {

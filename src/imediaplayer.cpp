@@ -25,8 +25,8 @@ IMediaPlayer::IMediaPlayer()
     std::cout << "\nYou can use the following commands:";
     std::cout << "\n\tadd_track <track_path>, tplay <track_path>";
     std::cout << "\n\tpause, stop, next, previous (prev), positions (pos)";
-    std::cout << "\n\trepeat, exit";
     std::cout << "\n\tremove, remove_duplicates";
+    std::cout << "\n\trepeat, random, exit";
     std::cout << "\n\tshow_track <track_path>, show_playlist";
     std::cout << "\n\n" << std::endl;
 }
@@ -56,6 +56,7 @@ void IMediaPlayer::exec()
     addTrack("track.flaque");
     addTrack("track.flaque");
     addTrack("track.mp3d");
+    m_playlist.removeDuplicates();
 
     while (m_run)
     {
@@ -129,10 +130,6 @@ void IMediaPlayer::parseCommand(const std::string& user_input)
             std::cout << "Which track would you like to remove ?" << std::endl;
         }
     }
-    else if (command == "remove_duplicates")
-    {
-        m_playlist.removeDuplicates();
-    }
     else if (command == "pause")
     {
         pause();
@@ -155,9 +152,17 @@ void IMediaPlayer::parseCommand(const std::string& user_input)
     {
         previous();
     }
+    else if (command == "remove_duplicates")
+    {
+        m_playlist.removeDuplicates();
+    }
     else if (command == "repeat")
     {
         m_playlist.toggleRepeat();
+    }
+    else if (command == "random")
+    {
+        m_playlist.toggleRandom();
     }
     else if (command == "show_track")
     {

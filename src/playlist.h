@@ -29,10 +29,11 @@ public:
 
     bool empty() const;
 
-    void repeat(bool on);
     void toggleRepeat();
+    void toggleRandom();
 
     std::string displayRepeat() const;
+    std::string displayRandom() const;
     std::string displayInfo() const;
 
 private:
@@ -40,6 +41,7 @@ private:
     std::list<fs::path>::iterator m_current_track = m_tracks.begin();
 
     bool m_repeat = false;
+    bool m_random = false;
 };
 
 #endif // PLAYLIST_H

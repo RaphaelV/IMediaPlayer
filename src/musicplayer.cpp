@@ -58,7 +58,6 @@ void MusicPlayer::playTrack(const Track& track)
 {
     if (isPlaybackOver())
     {
-        std::cout << "\n" << track.displayInfo() << "\n" << std::endl;
         auto d = track.duration();
         setPosition(std::chrono::milliseconds{0});
         std::thread t{[this, d]() { trackPlaybackSimu(d); }};
@@ -66,7 +65,7 @@ void MusicPlayer::playTrack(const Track& track)
     }
     else
     {
-        std::cout << "Previous track not ended" << std::endl;
+        std::cout << "\tPrevious track not ended" << std::endl;
     }
 }
 
@@ -98,7 +97,7 @@ void MusicPlayer::setPlaybackState(PlaybackState state)
         return;
 
     m_playback_state = state;
-    std::cout << "\tTrack: " << displayPlaybackState(state) << std::endl;
+    std::cout << std::right << std::setw(70) << "Track: " << displayPlaybackState(state) << std::endl;
 }
 
 void MusicPlayer::trackPlaybackSimu(std::chrono::milliseconds duration)
@@ -107,11 +106,6 @@ void MusicPlayer::trackPlaybackSimu(std::chrono::milliseconds duration)
 
     while (command != Command::Stop)
     {
-        if (hasCommand())
-        {
-            command = readCommand();
-        }
-
         if (command == Command::Play)
         {
             setPlaybackState(PlaybackState::Playing);
@@ -128,10 +122,15 @@ void MusicPlayer::trackPlaybackSimu(std::chrono::milliseconds duration)
 
             setPosition(p);
         }
-        else if (command == Command::Pause)
+        else
         {
             setPlaybackState(PlaybackState::Paused);
             std::this_thread::sleep_for(std::chrono::milliseconds{200});
+        }
+
+        if (hasCommand())
+        {
+            command = readCommand();
         }
     }
 

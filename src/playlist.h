@@ -28,6 +28,7 @@ public:
     void previous();
 
     bool empty() const;
+    size_t nbTracks() const;
 
     void toggleRepeat();
     void toggleRandom();

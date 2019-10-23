@@ -22,7 +22,7 @@ void Playlist::removeDuplicates()
 {
     if (isFinished())
     {
-        size_t nb_tracks = m_tracks.size();
+        size_t nb_tracks = nbTracks();
 
         std::set<fs::path> track_already_founded;
         m_tracks.remove_if([&track_already_founded](const fs::path& p)
@@ -32,11 +32,11 @@ void Playlist::removeDuplicates()
             return found;
         });
 
-        std::cout << "Removed " << (nb_tracks - m_tracks.size()) << " track(s)" << std::endl;
+        std::cout << "\tRemoved " << (nb_tracks - nbTracks()) << " track(s)\n" << std::endl;
     }
     else
     {
-        std::cout << "Please stop before using removing duplicates" << std::endl;
+        std::cout << "\tPlease stop before using removing duplicates\n" << std::endl;
     }
 }
 
@@ -44,14 +44,14 @@ void Playlist::clear()
 {
     m_tracks.clear();
     m_current_track = m_tracks.end();
-    std::cout << "Playlist cleared" << std::endl;
+    std::cout << "\tPlaylist cleared\n" << std::endl;
 }
 
 void Playlist::play()
 {
     if (empty())
     {
-        std::cout << "The playlist is empty" << std::endl;
+        std::cout << "\tThe playlist is empty\n" << std::endl;
         return;
     }
 
@@ -100,6 +100,9 @@ void Playlist::next()
     else
     {
         m_current_track = m_repeat ? m_tracks.begin() : m_tracks.end();
+
+        if (isFinished())
+            std::cout << "\tPlaylist finished\n" << std::endl;
     }
 }
 
@@ -112,7 +115,7 @@ void Playlist::previous()
 {
     if (m_random)
     {
-        std::cout << "No previous track in random mode" << std::endl;
+        std::cout << "\tNo previous track in random mode\n" << std::endl;
     }
 
     if (hasPrevious())
@@ -131,6 +134,11 @@ void Playlist::previous()
 bool Playlist::empty() const
 {
     return m_tracks.empty();
+}
+
+size_t Playlist::nbTracks() const
+{
+    return m_tracks.size();
 }
 
 void Playlist::toggleRepeat()
@@ -163,12 +171,14 @@ std::string Playlist::displayInfo() const
 {
     std::stringstream ss;
 
-    ss << "Playlist size:" << m_tracks.size() << "\n";
-    ss << displayRepeat() << " "<< displayRandom() << "\n";
+    ss << "\tPlaylist size:" << nbTracks() << "\n";
+    ss << "\t" << displayRepeat() << " "<< displayRandom() << "\n";
+
+    size_t track_indice = 0;
 
     for (const fs::path& track : m_tracks)
     {
-        ss << track.filename() << "\n";
+        ss << "\t" << (++track_indice) << " - " << track.filename() << (track == currentTrack() ? " <" :"") << "\n";
     }
 
     return ss.str();

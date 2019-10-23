@@ -22,13 +22,13 @@ IMediaPlayer::IMediaPlayer()
         std::cout << " " << ext ;
     }
 
-    std::cout << "\nYou can use the following commands:";
-    std::cout << "\n\tadd_track <track_path>, tplay <track_path>";
-    std::cout << "\n\tpause, stop, next, previous (prev), positions (pos)";
-    std::cout << "\n\tremove, remove_duplicates";
-    std::cout << "\n\trepeat, random, exit";
-    std::cout << "\n\tshow_track <track_path>, show_playlist";
-    std::cout << "\n\n" << std::endl;
+    std::cout << "\nYou can use the following commands:"
+    << "\n\tadd_track \"track_path\", play (\"track_path\")"
+    << "\n\tpause, stop, next, previous, position"
+    << "\n\tremove \"track_path\", remove_duplicates"
+    << "\n\trepeat, random, exit"
+    << "\n\tshow_track \"track_path\", show_playlist"
+    << "\n\n" << std::endl;
 }
 
 static std::string readUserInput()
@@ -200,8 +200,8 @@ void IMediaPlayer::readPlaylist()
         if (current_track.empty())
             return;
 
-        if (m_music_player.playbackState() == MusicPlayer::PlaybackState::Ended)
-            next();
+        //        if (m_music_player.playbackState() == MusicPlayer::PlaybackState::Ended)
+        next();
 
         readTrack(current_track);
     }
@@ -211,7 +211,11 @@ void IMediaPlayer::readTrack(const fs::path& current_track)
 {
     if (auto optional_track = loadTrack(current_track))
     {
-        m_music_player.playTrack(optional_track.value());
+        const Track& track = optional_track.value();
+        std::cout << "\n" << m_playlist.displayInfo() << "\n"
+        << track.displayInfo() << "\n" << std::endl;
+
+        m_music_player.playTrack(track);
     }
     else // Invalid track
     {
@@ -318,11 +322,13 @@ void IMediaPlayer::stop()
 {
     if (!m_music_player.isPlaybackOver())
         m_music_player.request(MusicPlayer::Command::Stop);
+    else
+        std::cout << "\tTrack already stopped\n" << std::endl;
 
     m_playlist.stop();
 }
 
 void IMediaPlayer::trackPosition() const
 {
-    std::cout << "\tTrack position: " << utils::displayDuration(m_music_player.position()) << std::endl;
+    std::cout << "\tTrack position: " << utils::displayDuration(m_music_player.position()) << "\n" << std::endl;
 }

@@ -49,9 +49,9 @@ bool Track::isValid() const
 std::string Track::displayInfo() const
 {
     std::stringstream ss;
-    ss << "Track: " << m_metadata.artist << " - " << m_metadata.title << " (Album: "<< m_metadata.album << ")\n"
-       << "Duration: " << utils::displayDuration(m_metadata.duration_ms) << "\n"
-       << "Codec: " << m_metadata.codec;
+    ss << "\tTrack: " << m_metadata.artist << " - " << m_metadata.title << " (Album: "<< m_metadata.album << ")\n"
+       << "\tDuration: " << utils::displayDuration(m_metadata.duration_ms) << "\n"
+       << "\tCodec: " << m_metadata.codec;
 
     return ss.str();
 }

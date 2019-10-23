@@ -23,10 +23,10 @@ IMediaPlayer::IMediaPlayer()
     }
 
     std::cout << "\nYou can use the following commands:";
-    std::cout << "\n\tadd_track <track_path>";
-    std::cout << "\n\tplay optionnal(<track_path>)";
-    std::cout << "\n\tpause, stop, next, previous (prev),";
-    std::cout << "\n\tpositions (pos), remove, repeat, exit";
+    std::cout << "\n\tadd_track <track_path>, tplay <track_path>";
+    std::cout << "\n\tpause, stop, next, previous (prev), positions (pos)";
+    std::cout << "\n\trepeat, exit";
+    std::cout << "\n\tremove, remove_duplicates";
     std::cout << "\n\tshow_track <track_path>, show_playlist";
     std::cout << "\n\n" << std::endl;
 }
@@ -44,13 +44,18 @@ void IMediaPlayer::exec()
 
     std::future<std::string> user_input = std::async(std::launch::async, readUserInput);
 
+    addTrack("track.mp3d");
+    addTrack("track.flaque");
+    addTrack("track.flaque");
+    addTrack("track.mp3d");
     addTrack("track.bad");
     addTrack("BAD");
     addTrack("track.omg");
     addTrack("track.bad.omg");
-    addTrack("track.flaque");
     addTrack("track.mp3d");
     addTrack("track.flaque");
+    addTrack("track.flaque");
+    addTrack("track.mp3d");
 
     while (m_run)
     {
@@ -123,6 +128,10 @@ void IMediaPlayer::parseCommand(const std::string& user_input)
         {
             std::cout << "Which track would you like to remove ?" << std::endl;
         }
+    }
+    else if (command == "remove_duplicates")
+    {
+        m_playlist.removeDuplicates();
     }
     else if (command == "pause")
     {

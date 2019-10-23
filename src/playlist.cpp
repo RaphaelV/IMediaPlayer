@@ -1,4 +1,5 @@
 #include <iostream>
+#include <set>
 #include <sstream>
 
 #include "playlist.h"
@@ -17,6 +18,20 @@ void Playlist::remove(const fs::path& p)
 
 void Playlist::removeDuplicates()
 {
+    if (isFinished())
+    {
+        std::set<fs::path> track_already_founded;
+        m_tracks.remove_if([&track_already_founded](const fs::path& p)
+        {
+            bool found = track_already_founded.find(p) != track_already_founded.end();
+            track_already_founded.insert(p);
+            return found;
+        });
+    }
+    else
+    {
+        std::cout << "Please stop before using removing duplicates" << std::endl;
+    }
 }
 
 void Playlist::clear()

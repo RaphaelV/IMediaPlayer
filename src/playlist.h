@@ -32,6 +32,9 @@ public:
     void repeat(bool on);
     void toggleRepeat();
 
+    std::string displayRepeat() const;
+    std::string displayInfo() const;
+
 private:
     std::list<fs::path> m_tracks;
     std::list<fs::path>::iterator m_current_track = m_tracks.begin();

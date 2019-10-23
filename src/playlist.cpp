@@ -1,4 +1,5 @@
 #include <iostream>
+#include <sstream>
 
 #include "playlist.h"
 
@@ -71,15 +72,7 @@ void Playlist::next()
     }
     else
     {
-        if (m_repeat)
-        {
-            m_current_track = m_tracks.begin();
-        }
-        else
-        {
-            m_current_track = m_tracks.end();
-            std::cout << "No next track" << std::endl;
-        }
+        m_current_track = m_repeat ? m_tracks.begin() : m_tracks.end();
     }
 }
 
@@ -100,10 +93,6 @@ void Playlist::previous()
         {
             m_current_track = std::prev(m_tracks.end());
         }
-        else
-        {
-            std::cout << "No previous track" << std::endl;
-        }
     }
 }
 
@@ -120,5 +109,27 @@ void Playlist::repeat(bool on)
 void Playlist::toggleRepeat()
 {
     m_repeat = !m_repeat;
-    std::cout << "\trepeat: " << (m_repeat ? "ON" : "OFF") << std::endl;
+    std::cout << "\t" << displayRepeat() << std::endl;
+}
+
+std::string Playlist::displayRepeat() const
+{
+    std::stringstream ss;
+    ss << "repeat: " << (m_repeat ? "ON" : "OFF");
+    return ss.str();
+}
+
+std::string Playlist::displayInfo() const
+{
+    std::stringstream ss;
+
+    ss << "Playlist size:" << m_tracks.size() << "\n";
+    ss << displayRepeat() << "\n";
+
+    for (const fs::path& track : m_tracks)
+    {
+        ss << track.filename() << "\n";
+    }
+
+    return ss.str();
 }

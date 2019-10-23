@@ -23,6 +23,9 @@ public:
     void addTrack(const std::string& file);
     void removeTrack(const std::string& file);
 
+    bool isTrackValid(const fs::path& p);
+    void showTrack(const fs::path& p);
+
     void play();
     void next();
     void previous();

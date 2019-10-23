@@ -23,9 +23,11 @@ IMediaPlayer::IMediaPlayer()
     }
 
     std::cout << "\nYou can use the following commands:";
-    std::cout << "\n\tadd_track <track_name/track_path>";
-    std::cout << "\n\tplay optionnal(<track_name/track_path>)";
-    std::cout << "\n\tpause, stop, next, previous (prev), positions (pos), remove, repeat, exit";
+    std::cout << "\n\tadd_track <track_path>";
+    std::cout << "\n\tplay optionnal(<track_path>)";
+    std::cout << "\n\tpause, stop, next, previous (prev),";
+    std::cout << "\n\tpositions (pos), remove, repeat, exit";
+    std::cout << "\n\tshow_track <track_path>, show_playlist";
     std::cout << "\n\n" << std::endl;
 }
 
@@ -48,6 +50,7 @@ void IMediaPlayer::exec()
     addTrack("track.bad.omg");
     addTrack("track.flaque");
     addTrack("track.mp3d");
+    addTrack("track.flaque");
 
     while (m_run)
     {
@@ -147,6 +150,22 @@ void IMediaPlayer::parseCommand(const std::string& user_input)
     {
         m_playlist.toggleRepeat();
     }
+    else if (command == "show_track")
+    {
+        if (args.size() > 1)
+        {
+            fs::path p = file_loader::convertToAbsolutePath(args.at(1));
+            showTrack(p);
+        }
+        else
+        {
+            showTrack(m_playlist.currentTrack());
+        }
+    }
+    else if (command == "show_playlist")
+    {
+        std::cout << "\n" << m_playlist.displayInfo() << std::endl;
+    }
     else if (command == "exit")
     {
         exit();
@@ -183,6 +202,7 @@ void IMediaPlayer::readTrack(const fs::path& current_track)
     else // Invalid track
     {
         m_playlist.remove(current_track);
+        std::cout << "Invalid track removed" << std::endl;
     }
 }
 
@@ -195,22 +215,33 @@ std::optional<Track> IMediaPlayer::loadTrack(const fs::path& file_absolut_path)
     return file_loader::parseTrack(file_absolut_path);
 }
 
-void IMediaPlayer::addTrack(const std::string& file)
+bool IMediaPlayer::isTrackValid(const fs::path& p)
 {
-    fs::path p = file_loader::convertToAbsolutePath(file);
     std::string ext = p.extension().string();
 
     if (file_loader::doesFileExist(p))
     {
         if(MusicPlayer::isTrackExtValid(ext.c_str()))
         {
-            std::cout << "\tAdded " << p.filename() << std::endl;
-            m_playlist.add(p);
+            return true;
         }
         else
         {
             std::cout << "The " << ext << " files, can't be read" << std::endl;
         }
+    }
+
+    return false;
+}
+
+void IMediaPlayer::addTrack(const std::string& file)
+{
+    fs::path p = file_loader::convertToAbsolutePath(file);
+
+    if (isTrackValid(p))
+    {
+        std::cout << "\tAdded " << p.filename() << std::endl;
+        m_playlist.add(p);
     }
 }
 
@@ -218,6 +249,20 @@ void IMediaPlayer::removeTrack(const std::string& file)
 {
     fs::path p = file_loader::convertToAbsolutePath(file);
     m_playlist.remove(p);
+}
+
+void IMediaPlayer::showTrack(const fs::path& p)
+{
+    if (isTrackValid(p))
+    {
+        if (auto optional_track = loadTrack(p))
+        {
+            std::cout << "\n" << optional_track.value().displayInfo() << std::endl;
+            return;
+        }
+    }
+
+    std::cout << "Invalid track" << std::endl;
 }
 
 void IMediaPlayer::play()

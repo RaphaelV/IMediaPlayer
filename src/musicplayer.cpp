@@ -32,6 +32,9 @@ constexpr const char* MusicPlayer::displayPlaybackState(MusicPlayer::PlaybackSta
     if (state == PlaybackState::Stopped)
         return "Stopped";
 
+    if (state == PlaybackState::Ended)
+        return "Ended";
+
     return "";
 }
 
@@ -53,7 +56,7 @@ std::chrono::milliseconds MusicPlayer::position() const
 
 void MusicPlayer::playTrack(const Track& track)
 {
-    if (playbackState() == PlaybackState::Stopped)
+    if (isPlaybackOver())
     {
         std::cout << "\n" << track.displayInfo() << "\n" << std::endl;
         auto d = track.duration();
@@ -63,7 +66,7 @@ void MusicPlayer::playTrack(const Track& track)
     }
     else
     {
-        std::cout << "Previous track not stopped" << std::endl;
+        std::cout << "Previous track not ended" << std::endl;
     }
 }
 
@@ -81,6 +84,12 @@ void MusicPlayer::setPosition(std::chrono::milliseconds pos)
 MusicPlayer::PlaybackState MusicPlayer::playbackState() const
 {
     return m_playback_state;
+}
+
+bool MusicPlayer::isPlaybackOver() const
+{
+    return playbackState() == PlaybackState::Stopped ||
+            playbackState() == PlaybackState::Ended;
 }
 
 void MusicPlayer::setPlaybackState(PlaybackState state)
@@ -106,13 +115,16 @@ void MusicPlayer::trackPlaybackSimu(std::chrono::milliseconds duration)
         if (command == Command::Play)
         {
             setPlaybackState(PlaybackState::Playing);
-            auto one_sec = std::chrono::seconds{1};
+            auto read_time = std::chrono::milliseconds{500};
             // Sound playing simulation
-            std::this_thread::sleep_for(one_sec);
-            auto p = position() + one_sec;
+            std::this_thread::sleep_for(read_time);
+            auto p = position() + read_time;
 
             if (p > duration)
-                break;
+            {
+                setPlaybackState(PlaybackState::Ended);
+                return;
+            }
 
             setPosition(p);
         }

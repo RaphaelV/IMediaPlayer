@@ -107,7 +107,18 @@ void IMediaPlayer::parseCommand(const std::string& user_input)
         }
         else
         {
-            std::cout << "What track would you like to add ?" << std::endl;
+            std::cout << "Which track would you like to add ?" << std::endl;
+        }
+    }
+    else if (command == "remove")
+    {
+        if (args.size() > 1)
+        {
+            removeTrack(args.at(1));
+        }
+        else
+        {
+            std::cout << "Which track would you like to remove ?" << std::endl;
         }
     }
     else if (command == "pause")
@@ -144,20 +155,30 @@ void IMediaPlayer::parseCommand(const std::string& user_input)
 
 void IMediaPlayer::readPlaylist()
 {
-    if (m_music_player.playbackState() == MusicPlayer::PlaybackState::Stopped
+    if (m_music_player.isPlaybackOver()
             && !m_playlist.isFinished())
     {
-        if (auto optional_track = loadTrack(m_playlist.currentTrack()))
-        {
-            m_music_player.playTrack(optional_track.value());
-        }
-        else
-        {
-            if (!m_playlist.currentTrack().empty())
-                removeTrack(m_playlist.currentTrack());
-        }
+        fs::path current_track = m_playlist.currentTrack();
 
-        m_playlist.next();
+        if (current_track.empty())
+            return;
+
+        if (m_music_player.playbackState() == MusicPlayer::PlaybackState::Ended)
+            next();
+
+        readTrack(current_track);
+    }
+}
+
+void IMediaPlayer::readTrack(const fs::path& current_track)
+{
+    if (auto optional_track = loadTrack(current_track))
+    {
+        m_music_player.playTrack(optional_track.value());
+    }
+    else // Invalid track
+    {
+        m_playlist.remove(current_track);
     }
 }
 
@@ -191,12 +212,8 @@ void IMediaPlayer::addTrack(const std::string& file)
 
 void IMediaPlayer::removeTrack(const std::string& file)
 {
-
-}
-
-void IMediaPlayer::removeTrack(const fs::path &file)
-{
-
+    fs::path p = file_loader::convertToAbsolutePath(file);
+    m_playlist.remove(p);
 }
 
 void IMediaPlayer::play()
@@ -207,31 +224,39 @@ void IMediaPlayer::play()
     }
     else
     {
-        m_playlist.play();
+        if (m_music_player.isPlaybackOver())
+        {
+            m_playlist.play();
+        }
     }
 }
 
 void IMediaPlayer::next()
 {
-    m_music_player.request(MusicPlayer::Command::Stop);
+    if (!m_music_player.isPlaybackOver())
+        m_music_player.request(MusicPlayer::Command::Stop);
     m_playlist.next();
 }
 
 void IMediaPlayer::previous()
 {
-    m_music_player.request(MusicPlayer::Command::Stop);
+    if (!m_music_player.isPlaybackOver())
+        m_music_player.request(MusicPlayer::Command::Stop);
     m_playlist.previous();
 }
 
 void IMediaPlayer::pause()
 {
-    m_music_player.request(MusicPlayer::Command::Pause);
+    if (!m_music_player.isPlaybackOver())
+        m_music_player.request(MusicPlayer::Command::Pause);
 }
 
 void IMediaPlayer::stop()
 {
+    if (!m_music_player.isPlaybackOver())
+        m_music_player.request(MusicPlayer::Command::Stop);
+
     m_playlist.stop();
-    m_music_player.request(MusicPlayer::Command::Stop);
 }
 
 void IMediaPlayer::trackPosition() const

@@ -33,9 +33,9 @@ public:
 private:
     void parseCommand(const std::string& user_input);
     void readPlaylist();
+    void readTrack(const fs::path& current_track);
 
     std::optional<Track> loadTrack(const fs::path& file_absolut_path);
-    void removeTrack(const fs::path& file);
 
 private:
     bool m_run = true;

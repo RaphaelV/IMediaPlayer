@@ -24,7 +24,8 @@ public:
     enum class PlaybackState {
         Stopped = 0,
         Playing,
-        Paused
+        Paused,
+        Ended
     };
 
     constexpr const char*  displayPlaybackState(PlaybackState state) const;
@@ -33,6 +34,7 @@ public:
     static bool isTrackExtValid(const char* ext);
 
     PlaybackState playbackState() const;
+    bool isPlaybackOver() const;
 
     std::chrono::milliseconds position() const;
 
@@ -50,7 +52,7 @@ private:
     Command readCommand();
 
 private:
-    std::atomic<PlaybackState> m_playback_state = PlaybackState::Stopped;
+    std::atomic<PlaybackState> m_playback_state = PlaybackState::Ended;
     std::atomic<std::chrono::milliseconds> m_position_ms = std::chrono::milliseconds{0};
 
     std::queue<Command> m_commands;

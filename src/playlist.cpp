@@ -2,9 +2,20 @@
 
 #include "playlist.h"
 
+
 void Playlist::add(const fs::path& p)
 {
     m_tracks.push_back(p);
+}
+
+void Playlist::remove(const fs::path& p)
+{
+    if (p != currentTrack())
+        m_tracks.remove(p);
+}
+
+void Playlist::removeDuplicates()
+{
 }
 
 void Playlist::clear()
@@ -52,34 +63,55 @@ bool Playlist::hasNext() const
     return true;
 }
 
-fs::path Playlist::next()
+void Playlist::next()
 {
-    if (isFinished())
-        return {};
-
-    m_current_track = std::next(m_current_track, 1);
-
-    if (isFinished())
-        return {};
-
-    return  *m_current_track;
+    if (hasNext())
+    {
+        m_current_track = std::next(m_current_track, 1);
+    }
+    else
+    {
+        if (m_repeat)
+        {
+            m_current_track = m_tracks.begin();
+        }
+        else
+        {
+            std::cout << "No next track" << std::endl;
+        }
+    }
 }
 
 bool Playlist::hasPrevious() const
 {
-   return m_current_track != m_tracks.begin();
+    return m_current_track != m_tracks.begin();
 }
 
-fs::path Playlist::previous()
+void Playlist::previous()
 {
-    if (!hasPrevious())
-        return {};
-
-    m_current_track = std::prev(m_current_track, 1);
-    return  *m_current_track;
+    if (hasPrevious())
+    {
+        m_current_track = std::prev(m_current_track);
+    }
+    else
+    {
+        if (m_repeat)
+        {
+            m_current_track = std::prev(m_tracks.end());
+        }
+        else
+        {
+            std::cout << "No previous track" << std::endl;
+        }
+    }
 }
 
 bool Playlist::empty() const
 {
     return m_tracks.empty();
+}
+
+void Playlist::repeat(bool on)
+{
+    m_repeat = on;
 }

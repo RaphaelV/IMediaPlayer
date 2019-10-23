@@ -25,7 +25,7 @@ IMediaPlayer::IMediaPlayer()
     std::cout << "\nYou can use the following commands:";
     std::cout << "\n\tadd_track <track_name/track_path>";
     std::cout << "\n\tplay optionnal(<track_name/track_path>)";
-    std::cout << "\n\tpause, stop, next, previous (prev), positions (pos), exit";
+    std::cout << "\n\tpause, stop, next, previous (prev), positions (pos), remove, repeat, exit";
     std::cout << "\n\n" << std::endl;
 }
 
@@ -142,6 +142,10 @@ void IMediaPlayer::parseCommand(const std::string& user_input)
              || command == "previous")
     {
         previous();
+    }
+    else if (command == "repeat")
+    {
+        m_playlist.toggleRepeat();
     }
     else if (command == "exit")
     {

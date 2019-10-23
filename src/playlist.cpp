@@ -77,6 +77,7 @@ void Playlist::next()
         }
         else
         {
+            m_current_track = m_tracks.end();
             std::cout << "No next track" << std::endl;
         }
     }
@@ -114,4 +115,10 @@ bool Playlist::empty() const
 void Playlist::repeat(bool on)
 {
     m_repeat = on;
+}
+
+void Playlist::toggleRepeat()
+{
+    m_repeat = !m_repeat;
+    std::cout << "\trepeat: " << (m_repeat ? "ON" : "OFF") << std::endl;
 }

@@ -30,6 +30,7 @@ public:
     bool empty() const;
 
     void repeat(bool on);
+    void toggleRepeat();
 
 private:
     std::list<fs::path> m_tracks;

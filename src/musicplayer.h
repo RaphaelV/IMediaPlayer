@@ -52,7 +52,7 @@ private:
     Command readCommand();
 
 private:
-    std::atomic<PlaybackState> m_playback_state = PlaybackState::Ended;
+    std::atomic<PlaybackState> m_playback_state = PlaybackState::Stopped;
     std::atomic<std::chrono::milliseconds> m_position_ms = std::chrono::milliseconds{0};
 
     std::queue<Command> m_commands;

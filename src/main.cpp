@@ -5,6 +5,8 @@ using namespace std;
 
 int main()
 {
+    // Cin will by default flush cout, we don't want this feature with mutiple threads
+    std::cin.tie(nullptr);
     IMediaPlayer mp;
     mp.exec();
 

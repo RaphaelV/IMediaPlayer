@@ -39,7 +39,7 @@ public:
 
 private:
     std::list<fs::path> m_tracks;
-    std::list<fs::path>::iterator m_current_track = m_tracks.begin();
+    std::list<fs::path>::iterator m_current_track_it = m_tracks.begin();
 
     bool m_repeat = false;
     bool m_random = false;

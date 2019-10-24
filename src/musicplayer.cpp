@@ -63,10 +63,6 @@ void MusicPlayer::playTrack(const Track& track)
         std::thread t{[this, d]() { trackPlaybackSimu(d); }};
         t.detach();
     }
-    else
-    {
-        std::cout << "\tPrevious track not ended" << std::endl;
-    }
 }
 
 void MusicPlayer::request(MusicPlayer::Command command)

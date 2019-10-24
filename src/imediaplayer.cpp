@@ -23,12 +23,12 @@ IMediaPlayer::IMediaPlayer()
     }
 
     std::cout << "\nYou can use the following commands:"
-    << "\n\tadd_track \"track_path\", play (\"track_path\")"
-    << "\n\tpause, stop, next, previous, position"
-    << "\n\tremove \"track_path\", remove_duplicates"
-    << "\n\trepeat, random, exit"
-    << "\n\tshow_track \"track_path\", show_playlist"
-    << "\n\n" << std::endl;
+              << "\n\tadd_track \"track_path\", play (\"track_path\")"
+              << "\n\tpause, stop, next, previous, position"
+              << "\n\tremove \"track_path\", remove_duplicates"
+              << "\n\trepeat, random, exit"
+              << "\n\tshow_track \"track_path\", show_playlist"
+              << "\n\n" << std::endl;
 }
 
 static std::string readUserInput()
@@ -211,7 +211,7 @@ void IMediaPlayer::readCurrentTrack()
     {
         const Track& track = optional_track.value();
         std::cout << "\n" << m_playlist.displayInfo() << "\n"
-        << track.displayInfo() << "\n" << std::endl;
+                  << track.displayInfo() << "\n" << std::endl;
 
         m_music_player.playTrack(track);
     }
@@ -290,7 +290,7 @@ void IMediaPlayer::play()
     }
     else
     {
-        if (m_music_player.playbackState() == MusicPlayer::PlaybackState::Stopped)
+        if (m_music_player.isPlaybackOver())
         {
             m_playlist.play();
             readCurrentTrack();

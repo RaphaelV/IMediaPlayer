@@ -16,6 +16,8 @@ void Playlist::remove(const fs::path& p)
 {
     if (p != currentTrack())
         m_tracks.remove(p);
+    else
+        std::cout << "Can't remove current track" << std::endl;
 }
 
 void Playlist::removeDuplicates()
@@ -43,7 +45,7 @@ void Playlist::removeDuplicates()
 void Playlist::clear()
 {
     m_tracks.clear();
-    m_current_track = m_tracks.end();
+    m_current_track_it = m_tracks.end();
     std::cout << "\tPlaylist cleared\n" << std::endl;
 }
 
@@ -56,17 +58,17 @@ void Playlist::play()
     }
 
     if (isFinished())
-        m_current_track = m_tracks.begin();
+        m_current_track_it = m_tracks.begin();
 }
 
 void Playlist::stop()
 {
-    m_current_track = m_tracks.end();
+    m_current_track_it = m_tracks.end();
 }
 
 bool Playlist::isFinished() const
 {
-    return m_current_track == m_tracks.end();
+    return m_current_track_it == m_tracks.end();
 }
 
 fs::path Playlist::currentTrack() const
@@ -74,12 +76,12 @@ fs::path Playlist::currentTrack() const
     if (isFinished())
         return {};
 
-    return *m_current_track;
+    return *m_current_track_it;
 }
 
 bool Playlist::hasNext() const
 {
-    if (isFinished() || std::next(m_current_track) == m_tracks.end())
+    if (isFinished() || std::next(m_current_track_it) == m_tracks.end())
         return false;
 
     return true;
@@ -89,17 +91,17 @@ void Playlist::next()
 {
     if (m_random)
     {
-        m_current_track = utils::getRandomElement(m_tracks.begin(), m_tracks.end());
+        m_current_track_it = utils::getRandomElement(m_tracks.begin(), m_tracks.end());
         return;
     }
 
     if (hasNext())
     {
-        m_current_track = std::next(m_current_track, 1);
+        m_current_track_it = std::next(m_current_track_it, 1);
     }
     else
     {
-        m_current_track = m_repeat ? m_tracks.begin() : m_tracks.end();
+        m_current_track_it = m_repeat ? m_tracks.begin() : m_tracks.end();
 
         if (isFinished())
             std::cout << "\tPlaylist finished\n" << std::endl;
@@ -108,7 +110,7 @@ void Playlist::next()
 
 bool Playlist::hasPrevious() const
 {
-    return m_current_track != m_tracks.begin();
+    return m_current_track_it != m_tracks.begin();
 }
 
 void Playlist::previous()
@@ -120,13 +122,13 @@ void Playlist::previous()
 
     if (hasPrevious())
     {
-        m_current_track = std::prev(m_current_track);
+        m_current_track_it = std::prev(m_current_track_it);
     }
     else
     {
         if (m_repeat)
         {
-            m_current_track = std::prev(m_tracks.end());
+            m_current_track_it = std::prev(m_tracks.end());
         }
     }
 }
@@ -176,9 +178,9 @@ std::string Playlist::displayInfo() const
 
     size_t track_indice = 0;
 
-    for (const fs::path& track : m_tracks)
+    for (auto it = m_tracks.begin(); it != m_tracks.end(); ++it)
     {
-        ss << "\t" << (++track_indice) << " - " << track.filename() << (track == currentTrack() ? " <" :"") << "\n";
+        ss << "\t" << (it == m_current_track_it ? "> " : "") <<(++track_indice) << " - " << it->filename() << "\n";
     }
 
     return ss.str();

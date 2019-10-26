@@ -1,0 +1,15 @@
+Demo files:
+
+    addTrack("track.mp3d");
+    addTrack("track.bad.omg");
+    addTrack("track.flaque");
+    addTrack("track.flaque");
+    addTrack("track.mp3d");
+    addTrack("track.bad");
+    addTrack("BAD");
+    addTrack("C:/track.omg");
+    addTrack("track.mp3d");
+    addTrack("track.flaque");
+    addTrack("track.flaque");
+    addTrack("track.mp3d");
+    m_playlist.removeDuplicates();

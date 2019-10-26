@@ -1,0 +1,2 @@
+This binary is in this repo to simplify its transfert.
+GMail won't allow exe .zip to be shipped.

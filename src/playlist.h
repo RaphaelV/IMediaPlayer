@@ -6,6 +6,7 @@
 
 namespace fs = std::filesystem;
 
+/* Manage track file order list */
 class Playlist
 {
 public:

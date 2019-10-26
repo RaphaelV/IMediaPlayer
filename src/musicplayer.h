@@ -9,6 +9,7 @@
 
 #include "track.h"
 
+/* Simulate music data playback */
 class MusicPlayer
 {
 public:

@@ -9,6 +9,7 @@
 
 namespace fs = std::filesystem;
 
+// Meta data are read as .csv, using ';' separator
 struct MetaData
 {
     std::string title = "";

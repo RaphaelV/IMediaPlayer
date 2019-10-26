@@ -12,6 +12,8 @@ namespace fs = std::filesystem;
 
 class Track;
 
+/* Main component the parse user commands, and
+ * use the playlist to play the loaded tracks, with the music player. */
 class IMediaPlayer
 {
 public:

@@ -23,9 +23,6 @@ public:
     void addTrack(const std::string& file);
     void removeTrack(const std::string& file);
 
-    bool isTrackValid(const fs::path& p);
-    void showTrack(const fs::path& p);
-
     void play();
     void next();
     void previous();
@@ -35,8 +32,12 @@ public:
 
 private:
     void parseCommand(const std::string& user_input);
+    // Called by the exec loop, play tracks one after the other
     void readPlaylist();
     void readCurrentTrack();
+
+    bool isTrackValid(const fs::path& p);
+    void showTrack(const fs::path& p);
 
     std::optional<Track> loadTrack(const fs::path& file_absolut_path);
 

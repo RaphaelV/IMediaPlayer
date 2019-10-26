@@ -102,9 +102,6 @@ void Playlist::next()
     else
     {
         m_current_track_it = m_repeat ? m_tracks.begin() : m_tracks.end();
-
-        if (isFinished())
-            std::cout << "\tPlaylist finished\n" << std::endl;
     }
 }
 

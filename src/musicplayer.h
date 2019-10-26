@@ -6,7 +6,6 @@
 #include <chrono>
 #include <mutex>
 #include <queue>
-#include <string>
 
 #include "track.h"
 
@@ -39,7 +38,6 @@ public:
     std::chrono::milliseconds position() const;
 
     void playTrack(const Track& track);
-
     void request(Command command);
 
 private:
@@ -55,6 +53,7 @@ private:
     std::atomic<PlaybackState> m_playback_state = PlaybackState::Stopped;
     std::atomic<std::chrono::milliseconds> m_position_ms = std::chrono::milliseconds{0};
 
+    // Command queue to communicate with the service playing music
     std::queue<Command> m_commands;
     mutable std::mutex m_commands_mutex;
 };

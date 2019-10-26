@@ -48,7 +48,6 @@ private:
     friend std::istream& operator >> (std::istream& in,  Track& track);
 
 private:
-
     fs::path m_file_path;
     MetaData m_metadata;
 };

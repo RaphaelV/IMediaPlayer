@@ -1,8 +1,6 @@
-#include <algorithm>
 #include <future>
 #include <iostream>
 #include <sstream>
-#include <thread>
 #include <vector>
 
 #include "fileloader.h"
@@ -40,23 +38,8 @@ static std::string readUserInput()
 
 void IMediaPlayer::exec()
 {
-    std::cout << "IMediaPlayer starting." << std::endl;
-
+    std::cout << "IMediaPlayer starting.\n";
     std::future<std::string> user_input = std::async(std::launch::async, readUserInput);
-
-    addTrack("track.mp3d");
-    addTrack("track.flaque");
-    addTrack("track.flaque");
-    addTrack("track.mp3d");
-    addTrack("track.bad");
-    addTrack("BAD");
-    addTrack("track.omg");
-    addTrack("track.bad.omg");
-    addTrack("track.mp3d");
-    addTrack("track.flaque");
-    addTrack("track.flaque");
-    addTrack("track.mp3d");
-    m_playlist.removeDuplicates();
 
     while (m_run)
     {
@@ -201,11 +184,14 @@ void IMediaPlayer::readPlaylist()
 }
 
 void IMediaPlayer::readCurrentTrack()
-{    
-    fs::path current_track = m_playlist.currentTrack();
-
-    if (current_track.empty())
+{        
+    if (m_playlist.isFinished())
+    {
+        std::cout << "\tPlaylist finished\n" << std::endl;
         return;
+    }
+
+    fs::path current_track = m_playlist.currentTrack();
 
     if (auto optional_track = loadTrack(current_track))
     {

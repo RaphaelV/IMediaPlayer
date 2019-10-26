@@ -60,6 +60,8 @@ void MusicPlayer::playTrack(const Track& track)
     {
         auto d = track.duration();
         setPosition(std::chrono::milliseconds{0});
+        // Simulate a service that reads music data,
+        // (raw music data could be added in parameters)
         std::thread t{[this, d]() { trackPlaybackSimu(d); }};
         t.detach();
     }
@@ -110,6 +112,7 @@ void MusicPlayer::trackPlaybackSimu(std::chrono::milliseconds duration)
             std::this_thread::sleep_for(read_time);
             auto p = position() + read_time;
 
+            // Playback duration can be longer than read time
             if (p > duration)
             {
                 setPlaybackState(PlaybackState::Ended);

@@ -206,6 +206,7 @@ void IMediaPlayer::readCurrentTrack()
         m_playlist.next();
         m_playlist.remove(current_track);
         std::cout << "Invalid track removed" << std::endl;
+        readCurrentTrack();
     }
 }
 

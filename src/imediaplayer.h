@@ -44,7 +44,11 @@ private:
     std::optional<Track> loadTrack(const fs::path& file_absolut_path);
 
 private:
+    // Used to stop the media player exec loop
     bool m_run = true;
+    //  Allow next playlist track to be played automatically
+    bool m_autoplay = false;
+
     MusicPlayer m_music_player;
     Playlist m_playlist;
 };
